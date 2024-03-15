@@ -1,92 +1,90 @@
 import { createServer } from 'http';
 import { parse } from 'url';
 import { existsSync, readFile } from 'fs';
-import { GoogleDriveClient } from './GoogleDriveClient'; // Ajusta la ruta según la ubicación de tu archivo GoogleDriveClient.js
-class GDrive {
-    constructor(credentials) {
-      const { client_secret, client_id, redirect_uris, access_token } = credentials.installed;
-      console.log(client_secret);
-      console.log(client_id);
-      console.log(redirect_uris);
-      console.log(access_token);
-      this.oAuth2Client = new google.auth.OAuth2(client_id, client_secret, redirect_uris[0]);
-      this.token = access_token; // Inicializa this.token con el token de acceso del JSON
-      this.drive = google.drive({ version: 'v3', auth: this.oAuth2Client });
-  }
-  
-  async authenticate() {
-    return new Promise((resolve, reject) => {
-        fs.readFile('google_drive.json', (err, data) => {
-            if (err) {
-                reject('Error llegint el fitxer de token:', err);
-                return;
+class GoogleDriveClient {
+    constructor(credentialsPath) {
+        const { clientId, clientSecret, redirectUri, refreshToken } = this.loadCredentials(credentialsPath);
+        this.driveClient = this.createDriveClient(clientId, clientSecret, redirectUri, refreshToken);
+    }
+
+    loadCredentials(credentialsPath) {
+        try {
+            const credentials = JSON.parse(fs.readFileSync(credentialsPath));
+            const { clientId, clientSecret, redirectUri, refreshToken } = credentials;
+            return { clientId, clientSecret, redirectUri, refreshToken };
+        } catch (error) {
+            console.error('Error loading credentials:', error);
+            process.exit(1);
+        }
+    }
+
+    createDriveClient(clientId, clientSecret, redirectUri, refreshToken) {
+        const client = new google.auth.OAuth2(
+            clientId,
+            clientSecret,
+            redirectUri
+        );
+        client.setCredentials({ refresh_token: refreshToken });
+        return google.drive({ version: 'v3', auth: client });
+    }
+
+    async listFiles() {
+        try {
+            const response = await this.driveClient.files.list({
+                pageSize: 10,
+                fields: 'nextPageToken, files(id, name)',
+            });
+            const files = response.data.files;
+            if (files.length) {
+                console.log('Files:');
+                files.forEach((file) => {
+                    console.log(`${file.name} (${file.id})`);
+                });
+            } else {
+                console.log('No files found.');
             }
-            const token = JSON.parse(data).installed;
-            console.log('Token:', token);
-            this.oAuth2Client = new google.auth.OAuth2(token.client_id, token.client_secret, token.redirect_uris[0]);
-            console.log('OAuth2Client:', this.oAuth2Client);
-            this.oAuth2Client.setCredentials({ access_token: token.access_token });
-            console.log('Credentials set:', this.oAuth2Client.credentials);
-            resolve('Autenticació completada amb èxit.');
-        });
-    });
-  }
-  
-  
-    async listFolders() {
-      const res = await this.drive.files.list({
-  
-        q: `mimeType='image/jpeg' and parents in '${'1tj58NJSDDjqP8u4YR1cN0AV0MFRz7t-Z'}' and trashed=false`,     
-         fields: 'files(id, name)',
-      });
-      return res.data.files;
+        } catch (error) {
+            console.error('Error listing files:', error);
+        }
     }
-  
-    async listFilesInFolder(folderId) {
-      const res = await this.drive.files.list({
-        q: `'${folderId}' in parents`,
-        fields: 'files(id, name)',
-      });
-      return res.data.files;
+    async createFolder(folderName) {
+        try {
+            const parentId = '1tj58NJSDDjqP8u4YR1cN0AV0MFRz7t-Z';
+            const response = await this.driveClient.files.create({
+                resource: {
+                    name: folderName,
+                    mimeType: 'application/vnd.google-apps.folder',
+                    parents: [parentId]
+                },
+                fields: 'id, name'
+            });
+            console.log('Folder created:', response.data.name, '(' + response.data.id + ')');
+        } catch (error) {
+            console.error('Error creating folder:', error);
+        }
     }
-  
-    async createFolder(name) {
-      const fileMetadata = {
-        name,
-        mimeType: 'application/vnd.google-apps.folder',
-      };
-      const res = await this.drive.files.create({
-        resource: fileMetadata,
-        fields: 'id',
-      });
-      return res.data.id;
-    }
-  
-    async uploadFile(filename, mimeType, folderId = null) {
-      const fileMetadata = {
-        name: filename,
-        parents: folderId ? [folderId] : [],
-      };
-      const media = {
-        mimeType,
-        body: fs.createReadStream(filename),
-      };
-      const res = await this.drive.files.create({
-        resource: fileMetadata,
-        media: media,
-        fields: 'id',
-      });
-      return res.data.id;
-    }
-  
-    async deleteFile(fileId) {
-      await this.drive.files.delete({ fileId });
-    }
-  
-    async deleteFolder(folderId) {
-      await this.drive.files.delete({ fileId: folderId });
-    }
-  }
+    async uploadFile(mimeType) {
+        try {
+            const folderId = '1tj58NJSDDjqP8u4YR1cN0AV0MFRz7t-Z';
+            const filePath = 'Nombre';
+            const fileMetadata = {
+                name: filePath.split('/').pop(), // Nom de l'arxiu a partir de la ruta del fitxer
+                parents: [folderId], // Id de la carpeta a la qual vols pujar l'arxiu
+            };
+            const media = {
+                mimeType: mimeType,
+                body: fs.createReadStream(filePath), // Crea un flux de lectura de l'arxiu local
+            };
+            const response = await this.driveClient.files.create({
+                resource: fileMetadata,
+                media: media,
+                fields: 'id',
+            });
+            console.log('File uploaded:', response.data.id);
+        } catch (error) {
+            console.error('Error uploading file:', error);
+        }}
+}
 
 const FILE_TYPES = {
 	html:"text/html",
