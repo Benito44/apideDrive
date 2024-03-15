@@ -1,6 +1,7 @@
-const fs = require('fs');
-const { google } = require('googleapis');
-
+import fs from 'fs';
+import { google } from 'googleapis';
+import { createServer } from 'http';
+import { parse } from 'url';
 export class GoogleDriveClient {
     constructor(credentialsPath) {
         const { clientId, clientSecret, redirectUri, refreshToken } = this.loadCredentials(credentialsPath);
@@ -85,7 +86,52 @@ export class GoogleDriveClient {
         }
     }
 }
+function header(resposta, codi, cType) {
+	resposta.setHeader('Access-Control-Allow-Origin', '*');
+	// Permetre peticions GET i POST
+	resposta.setHeader('Access-Control-Allow-Methods', 'GET, POST');
+	if (cType) resposta.writeHead(codi, {'Content-Type': cType + '; charset=utf-8'});
+	else resposta.writeHead(codi);
+}
 
+function enviarArxiu(resposta, dades, filename, cType, err) {
+    if (err) {
+        header(resposta, 400, 'text/html');
+        resposta.end("<p style='text-align:center;font-size:1.2rem;font-weight:bold;color:red'>Error al l legir l'arxiu</p>");
+        return;
+    }
+
+    header(resposta, 200, cType);
+    resposta.write(dades);
+    resposta.end();
+}
+
+function onRequest(peticio, resposta) {
+    let cosPeticio = "";
+
+    peticio.on('error', function (err) {
+        console.error(err);
+    }).on('data', function (dades) {
+        cosPeticio += dades;
+    }).on('end', function () {
+        resposta.on('error', function (err) {
+            console.error(err);
+        });
+
+        if (peticio.method == 'GET') {
+            let q = parse(peticio.url, true);
+            let filename = "." + q.pathname;
+
+            if (filename == "./") filename += "index.html";
+        }
+    });
+}
+
+let server = createServer();
+server.on('request', onRequest);
+
+server.listen(8080);
+console.log("Servidor escoltant en http://localhost:8080");
 // Example usage:
 // const credentialsPath = 'google_drive.json';
 // const driveClient = new GoogleDriveClient(credentialsPath);

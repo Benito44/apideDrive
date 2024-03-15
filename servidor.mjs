@@ -7,98 +7,43 @@ import { createServer } from 'http';
 import { parse } from 'url';
 import { existsSync } from 'fs';
 
-class GoogleDriveClient {
-    constructor(credentialsPath) {
-        const { clientId, clientSecret, redirectUri, refreshToken } = this.loadCredentials(credentialsPath);
-        this.driveClient = this.createDriveClient(clientId, clientSecret, redirectUri, refreshToken);
-    }
+async function onRequest(peticio, resposta) {
 
-    loadCredentials(credentialsPath) {
-        try {
-            const credentials = JSON.parse(fs.readFileSync(credentialsPath));
-            const { clientId, clientSecret, redirectUri, refreshToken } = credentials;
-            return { clientId, clientSecret, redirectUri, refreshToken };
-        } catch (error) {
-            console.error('Error loading credentials:', error);
-            process.exit(1);
-        }
-    }
+    peticio.on('error', function (err) {
+        console.error(err);
+    }).on('data', function (dades) {
+        cosPeticio += dades;
+        }).on('end', function () {
+        resposta.on('error', function (err) {
+            console.error(err);
+        });
 
-    createDriveClient(clientId, clientSecret, redirectUri, refreshToken) {
-        const client = new google.auth.OAuth2(
-            clientId,
-            clientSecret,
-            redirectUri
-        );
-        client.setCredentials({ refresh_token: refreshToken });
-        return google.drive({ version: 'v3', auth: client });
-    }
+        if (peticio.method == 'GET') {
+            let q = parse(peticio.url, true);
+            let filename = "." + q.pathname;
 
-    async listFiles() {
-        try {
-            const response = await this.driveClient.files.list({
-                pageSize: 10,
-                fields: 'nextPageToken, files(id, name)',
-            });
-            const files = response.data.files;
-            if (files.length) {
-                console.log('Files:');
-                files.forEach((file) => {
-                    console.log(`${file.name} (${file.id})`);
+            if (filename == "./") filename += "index.html";
+            if (existsSync(filename)) {
+
+              if (filename.endsWith(".svg")) {
+                readFile(filename, function (err, dades) {
+                    svgData = dades;
+                    enviarArxiu(resposta, dades, filename, 'image/svg+xml', err);
                 });
             } else {
-                console.log('No files found.');
+                readFile(filename, function (err, dades) {
+                    enviarArxiu(resposta, dades, filename, undefined, err);
+                });
             }
-        } catch (error) {
-            console.error('Error listing files:', error);
+            
+            }
+            else {
+                header(resposta, 404, 'text/html');
+                resposta.end("<p style='text-align:center;font-size:1.2rem;font-weight:bold;color:red'>404 Not Found</p>");
+            }
         }
-    }
-    async createFolder(folderName) {
-        try {
-            const parentId = '1tj58NJSDDjqP8u4YR1cN0AV0MFRz7t-Z';
-            const response = await this.driveClient.files.create({
-                resource: {
-                    name: folderName,
-                    mimeType: 'application/vnd.google-apps.folder',
-                    parents: [parentId]
-                },
-                fields: 'id, name'
-            });
-            console.log('Folder created:', response.data.name, '(' + response.data.id + ')');
-        } catch (error) {
-            console.error('Error creating folder:', error);
-        }
-    }
-    async upload(fileStream) {
-        try {
-            const parentId = '1tj58NJSDDjqP8u4YR1cN0AV0MFRz7t-Z';
-            const response = await this.driveClient.files.create({
-                resource: {
-                    name: 'fileName',
-                    mimeType: 'fileMimeType',
-                    parents: [parentId]
-                },
-                media: {
-                    mimeType: fileMimeType,
-                    body: fileStream
-                },
-                fields: 'id, name'
-            });
-            console.log('Folder created:', response.data.name, '(' + response.data.id + ')');
-        } catch (error) {
-            console.error('Error creating folder:', error);
-        }
-    }
-}
-function header(resposta, codi, cType) {
-    resposta.setHeader('Access-Control-Allow-Origin', '*');
-    // Permetre peticions GET i POST
-    resposta.setHeader('Access-Control-Allow-Methods', 'GET, POST');
-    if (cType) resposta.writeHead(codi, {'Content-Type': cType + '; charset=utf-8'});
-    else resposta.writeHead(codi);
-}
+    });
 
-async function onRequest(peticio, resposta) {
     if (peticio.method === 'POST') {
         try {
             const credentialsPath = 'google_drive.json'; // Ruta del fitxer de credencials
@@ -126,8 +71,38 @@ async function onRequest(peticio, resposta) {
             header(resposta, 500, 'text/plain');
             resposta.end('Error al pujar l\'arxiu al Google Drive.');
         }
-    } else {
-        // Resta del codi d'handleRequest aquí...
+    } else if (peticio.method === 'GET') {
+        
+        try {
+            const q = parse(peticio.url, true);
+            let filename = '.' + q.pathname;
+
+            if (filename === './') {
+                filename += 'index.html';
+            }
+
+            if (existsSync(filename)) {
+                readFile(filename, function(err, data) {
+                    if (err) {
+                        console.error('Error al leer el archivo:', err);
+                        header(resposta, 500, 'text/plain');
+                        resposta.end('Error al leer el archivo.');
+                    } else {
+                        header(resposta, 200, 'text/html');
+                        resposta.write(data);
+                        resposta.end();
+                    }
+                });
+            } else {
+                console.error('Error: El archivo solicitado no existe:', filename);
+                header(resposta, 404, 'text/plain');
+                resposta.end('Error: El archivo solicitado no existe.');
+            }
+        } catch (error) {
+            console.error('Error al manejar la solicitud GET:', error);
+            header(resposta, 500, 'text/plain');
+            resposta.end('Error al manejar la solicitud GET.');
+        }
     }
 }
 
