@@ -1,10 +1,13 @@
-
 import express from 'express';
-import { google } from 'googleapis';
 import fs from 'fs';
+import multer from 'multer';
+import { google } from 'googleapis';
+import { fileURLToPath } from 'url';
+
+
 const app = express();
 const PORT = 8080;
-
+const upload = multer({ dest: 'uploads/' }); // Directorio donde se guardarán los archivos temporales
 // Configurar middleware para manejar solicitudes POST multipart/form-data
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
@@ -98,44 +101,39 @@ class GoogleDriveClient {
 const credentialsPath = 'google_drive.json';
 const driveClient = new GoogleDriveClient(credentialsPath);
 
-// Ruta para manejar el formulario de carga de archivos
+
+import { dirname } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+// Luego, puedes usar __dirname en tu ruta:
 app.get('/', (req, res) => {
     res.sendFile(__dirname + '/index.html');
 });
-app.post('/ruta', async (req, res) => {
+app.post('/ruta', upload.any(), async (req, res) => {
     try {
-        if (!req.files || !req.files.epub) {
+        if (!req.files || !req.files.length) {
             res.status(400).send('No se encontró ningún archivo adjunto');
             return;
         }
 
-        const file = req.files.epub;
-        const filePath = './' + file.name;
+        const file = req.files[0]; // Obtener el primer archivo, si hay varios
+        const filePath = file.path;
 
-        // Guardar el archivo en el servidor
-        file.mv(filePath, async (err) => {
-            if (err) {
-                console.error('Error al guardar el archivo:', err);
-                res.status(500).send('Error al guardar el archivo');
-                return;
-            }
-
-            // Subir el archivo a Google Drive
-            try {
-                await driveClient.upload('application/epub+zip', filePath);
-                res.status(200).send('Archivo subido correctamente a Google Drive');
-            } catch (error) {
-                console.error('Error al subir el archivo a Google Drive:', error);
-                res.status(500).send('Error al subir el archivo a Google Drive');
-            }
-        });
+        // Subir el archivo a Google Drive
+        try {
+            await driveClient.upload('application/epub+zip', filePath);
+            res.status(200).send('Archivo subido correctamente a Google Drive');
+        } catch (error) {
+            console.error('Error al subir el archivo a Google Drive:', error);
+            res.status(500).send('Error al subir el archivo a Google Drive');
+        }
     } catch (error) {
         console.error('Error al procesar el formulario:', error);
         res.status(500).send('Error interno del servidor');
     }
-});
-
-// Iniciar el servidor
+});// Iniciar el servidor
 app.listen(PORT, () => {
     console.log(`Servidor escuchando en http://localhost:${PORT}`);
 });
