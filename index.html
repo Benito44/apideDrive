@@ -4,22 +4,38 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
-    <script type="module" src="controller.js"></script>
-
+    
 </head>
 <body>
-    <form method="post">
-        <input id="epub" type="file" accept=".epub">
-<button type="submit">Enviar</button>
+    <form id="myForm" enctype="multipart/form-data" method="post">
+        <input id="epub" name="epub" type="file" accept=".epub">
+
+        <button type="submit">Enviar</button>
     </form>
+
+    <script>
+        const form = document.getElementById('myForm');
+
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault(); // Evita que el formulario se envíe de forma predeterminada
+
+            const formData = new FormData(form); // Utiliza el formulario directamente
+
+            try {
+                const response = await fetch('http://localhost:8080/ruta', {
+                    method: 'POST',
+                    body: formData // Envía el FormData al servidor
+                });
+
+                if (response.ok) {
+                    console.log('Archivo enviado correctamente al servidor.');
+                } else {
+                    console.error('Error al enviar el archivo al servidor.');
+                }
+            } catch (error) {
+                console.error('Error en la solicitud:', error);
+            }
+        });
+    </script>
 </body>
-<<<<<<< HEAD
-<script>
-    document.getElementById('epub').addEventListener('load', function(e){
-        let file = e.target.files[0];
-        uploadFile(file);
-    });
-</script>
-=======
->>>>>>> 17a2f2528783d3a5c54d66a38ee06cca062fb90b
 </html>
