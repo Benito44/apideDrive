@@ -61,6 +61,7 @@
             background-color: #45a049;
         }
     </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.2.2/jszip.min.js"></script>
 </head>
 
 <body>
@@ -165,32 +166,65 @@ formElem.addEventListener('submit', async (e) => {
     });
 });
 
-function seleccionArchivo(){
-            let listadoArchivos = this.files;
-            let reader = new FileReader();
+let currentFileIndex = 0;
+    let filesContent = [];
+    let ventanaEmergente;
 
-            reader.onload = abrirArchivo;
-            reader.readAsText(listadoArchivos[0]);
+    function seleccionArchivo(){
+        let listadoArchivos = this.files;
+        let reader = new FileReader();
+
+        reader.onload = function(e) {
+            JSZip.loadAsync(e.target.result).then(function(zip) {
+                return zip.file("META-INF/container.xml").async("string").then(function(containerXml) {
+                    let parser = new DOMParser();
+                    let xmlDoc = parser.parseFromString(containerXml, 'text/xml');
+                    let opfPath = xmlDoc.getElementsByTagName('rootfile')[0].getAttribute('full-path');
+                    return zip.file(opfPath).async("string").then(function(opfContent) {
+                        let opfDoc = parser.parseFromString(opfContent, 'text/xml');
+                        let itemElements = opfDoc.getElementsByTagName('item');
+                        let itemrefElements = opfDoc.getElementsByTagName('itemref');
+                        let manifestItems = Array.from(itemElements).reduce((items, item) => {
+                            items[item.getAttribute('id')] = item.getAttribute('href');
+                            return items;
+                        }, {});
+                        let spinePaths = Array.from(itemrefElements).map(itemref => manifestItems[itemref.getAttribute('idref')]);
+                        return Promise.all(spinePaths.map(path => zip.file(path).async('string')));
+                    });
+                });
+            }).then(function(htmlContents){
+                filesContent = htmlContents;
+                abrirArchivo(currentFileIndex);
+            });
+        };
+        reader.readAsBinaryString(listadoArchivos[0]);
+    }
+
+    function abrirArchivo(index){
+        if (!ventanaEmergente || ventanaEmergente.closed) {
+            ventanaEmergente = window.open('', 'Contenido del libro', 'width=600, height=400');
         }
+        ventanaEmergente.document.write(filesContent[index]);
+        ventanaEmergente.document.close();
+    }
 
-        function abrirArchivo(){
-            let parser = new DOMParser();
-            console.log(this.result);
-            let contenidoXml = parser.parseFromString(this.result, 'text/xml');
+    window.addEventListener('load', () => {
+        let nombreArchivoEpub = document.getElementById('nombreArchivoEpub');
+        nombreArchivoEpub.addEventListener('change', seleccionArchivo);
 
-            let contenido = contenidoXml.getElementsByTagName('body');
-
-            if (contenido.length > 0){
-                let contenidoLibro = contenido[0].innerHTML;
-                console.log(contenidoLibro)
-                document.getElementById('contenidoEpub').innerHTML = contenidoLibro;
+        window.addEventListener('keydown', function(event) {
+            switch (event.key) {
+                case 'ArrowRight':
+                    currentFileIndex = Math.min(currentFileIndex + 1, filesContent.length - 1);
+                    abrirArchivo(currentFileIndex);
+                    break;
+                case 'ArrowLeft':
+                    currentFileIndex = Math.max(currentFileIndex - 1, 0);
+                    abrirArchivo(currentFileIndex);
+                    break;
             }
-        }
-
-        window.addEventListener('load', () => {
-            let nombreArchivoEpub = document.getElementById('nombreArchivoEpub');
-            nombreArchivoEpub.addEventListener('change', seleccionArchivo);
         });
+    });
 
 </script>
 </html>
