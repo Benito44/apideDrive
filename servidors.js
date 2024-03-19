@@ -7,11 +7,16 @@ import { fileURLToPath } from 'url';
 
 const app = express();
 const PORT = 8080;
+
 const upload = multer({ dest: 'uploads/' }); // Directorio donde se guardarán los archivos temporales
 // Configurar middleware para manejar solicitudes POST multipart/form-data
+
 app.use(express.urlencoded({ extended: true }));
+
 app.use(express.json());
+
 app.use(express.static('public')); // Si tienes archivos estáticos como HTML, CSS o JS
+
 
 class GoogleDriveClient {
     constructor(credentialsPath) {
@@ -77,9 +82,10 @@ class GoogleDriveClient {
     async upload(mimeType, filePath) {
         try {
             const folderId = '1tj58NJSDDjqP8u4YR1cN0AV0MFRz7t-Z';
+            const fileName = filePath.split('/').pop(); // Obtener el nombre del archivo a partir de la ruta
             const fileMetadata = {
-                name: filePath.split('/').pop(), // Nombre del archivo a partir de la ruta del archivo
-                parents: ['1tj58NJSDDjqP8u4YR1cN0AV0MFRz7t-Z'], // ID de la carpeta a la que quieres subir el archivo
+                name: fileName, // Usar el nombre original del archivo
+                parents: [folderId], // ID de la carpeta a la que quieres subir el archivo
             };
             const media = {
                 mimeType: mimeType,
@@ -97,6 +103,28 @@ class GoogleDriveClient {
             throw error; // Lanza el error para manejarlo en el contexto donde se llame a esta función
         }
     }
+    async listFilesInFolder(folderId) {
+        try {
+            const response = await this.driveClient.files.list({
+                q: `mimeType='application/epub+zip' and parents in '${folderId}' and trashed=false`,                
+                fields: 'files(id, name)',
+            });
+            const files = response.data.files;
+            if (files.length) {
+                console.log('Files in folder:');
+                files.forEach((file) => {
+                    console.log(`${file.name} (${file.id})`);
+                });
+            } else {
+                console.log('No files found in folder.');
+            }
+            return files;
+        } catch (error) {
+            console.error('Error listing files in folder:', error);
+            throw error;
+        }
+    }
+    
 }
 const credentialsPath = 'google_drive.json';
 const driveClient = new GoogleDriveClient(credentialsPath);
@@ -110,6 +138,16 @@ const __dirname = dirname(__filename);
 // Luego, puedes usar __dirname en tu ruta:
 app.get('/', (req, res) => {
     res.sendFile(__dirname + '/index.html');
+});
+app.get('/listar-archivos-en-carpeta', async (req, res) => {
+    try {
+        const folderId = "1tj58NJSDDjqP8u4YR1cN0AV0MFRz7t-Z";
+        let filesInFolder = await driveClient.listFilesInFolder(folderId);
+        res.json(filesInFolder);
+    } catch (error) {
+        console.error('Error al obtener la lista de archivos en la carpeta:', error);
+        res.status(500).send('Error al obtener la lista de archivos en la carpeta');
+    }
 });
 app.post('/ruta', upload.any(), async (req, res) => {
     try {
