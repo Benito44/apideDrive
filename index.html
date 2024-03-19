@@ -81,8 +81,13 @@
             </select>
             <button id="myButton" type="submit">Submit</button>
         </form>
-        <iframe id="chapterFrame" src="" frameborder="0"></iframe>
 
+        <input type="file" id="nombreArchivoEpub" name="fileALleguir">
+        <label for="nombreArchivoEpub">Hola</label>
+        <button id="mostrarFile">Lleguir</button>
+
+        <div id="contenidoEpub"></div>
+        
     </div>
 </body>
 <script>
@@ -159,6 +164,33 @@ formElem.addEventListener('submit', async (e) => {
         console.error(error);
     });
 });
+
+function seleccionArchivo(){
+            let listadoArchivos = this.files;
+            let reader = new FileReader();
+
+            reader.onload = abrirArchivo;
+            reader.readAsText(listadoArchivos[0]);
+        }
+
+        function abrirArchivo(){
+            let parser = new DOMParser();
+            console.log(this.result);
+            let contenidoXml = parser.parseFromString(this.result, 'text/xml');
+
+            let contenido = contenidoXml.getElementsByTagName('body');
+
+            if (contenido.length > 0){
+                let contenidoLibro = contenido[0].innerHTML;
+                console.log(contenidoLibro)
+                document.getElementById('contenidoEpub').innerHTML = contenidoLibro;
+            }
+        }
+
+        window.addEventListener('load', () => {
+            let nombreArchivoEpub = document.getElementById('nombreArchivoEpub');
+            nombreArchivoEpub.addEventListener('change', seleccionArchivo);
+        });
 
 </script>
 </html>

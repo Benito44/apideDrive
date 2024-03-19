@@ -27,6 +27,11 @@ import { dirname } from 'path';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
+
+// Array con los libros y el capítulo que se encuentra leyendo el usuario
+
+let libros = [];
+
 // Luego, puedes usar __dirname en tu ruta:
 app.get('/', (req, res) => {
     res.sendFile(__dirname + '/index.html');
@@ -41,6 +46,17 @@ app.get('/listar-archivos-en-carpeta', async (req, res) => {
         res.status(500).send('Error al obtener la lista de archivos en la carpeta');
     }
 });
+app.get('/libroId', async (req, res) => {
+    try {
+        const libroId = req.params.libroId;
+        let libro = await driveClient.getFile(libroId);
+        res.json(libro);
+    } catch (error) {
+        console.error('Error al obtener el libro:', error);
+        res.status(500).send('Error al obtener el libro');
+    }
+});
+
 app.post('/ruta', upload.any(), async (req, res) => {
     try {
         if (!req.files || !req.files.length) {
