@@ -1,5 +1,4 @@
 import fs from 'fs';
-
 import { google } from 'googleapis';
 export class GoogleDriveClient {
     constructor(credentialsPath) {
@@ -65,7 +64,8 @@ export class GoogleDriveClient {
     async upload(mimeType, filePath) {
         try {
             const folderId = '1tj58NJSDDjqP8u4YR1cN0AV0MFRz7t-Z';
-            const fileName = filePath.split('/').pop(); // Obtener el nombre del archivo a partir de la ruta
+            console.log(filePath);
+            const fileName = filePath; // Obtener el nombre del archivo a partir de la ruta
             const fileMetadata = {
                 name: fileName, // Usar el nombre original del archivo
                 parents: [folderId], // ID de la carpeta a la que quieres subir el archivo

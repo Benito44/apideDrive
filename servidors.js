@@ -1,6 +1,6 @@
 import express from 'express';
 import fs from 'fs';
-
+import path from 'path';
 import { google } from 'googleapis';
 import multer from 'multer';
 import { fileURLToPath } from 'url';
@@ -64,9 +64,8 @@ app.post('/ruta', upload.any(), async (req, res) => {
             return;
         }
 
-        const file = req.files[0]; // Obtener el primer archivo, si hay varios
-        const filePath = file.path;
-
+        const file = req.files[0];
+        const filePath = file.originalname;
         // Subir el archivo a Google Drive
         try {
             await driveClient.upload('application/epub+zip', filePath);
