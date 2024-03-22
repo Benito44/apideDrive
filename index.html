@@ -121,39 +121,26 @@ async function loadFilesIntoDropdown() {
     }
 }
 
-    // Definir una variable para almacenar el índice de la página actualmente mostrada
-    let currentPageIndex = 0;
+// Definir una variable para almacenar el índice de la página actualmente mostrada
+let currentPageIndex = 0;
 
-    // Función para avanzar a la siguiente página
-    function nextPage() {
-        if (currentPageIndex < filesContent.length - 1) {
-            currentPageIndex++;
-            abrirArchivo(filesContent[currentPageIndex]);
-        }
+// Función para avanzar a la siguiente página
+function nextPage() {
+    if (currentPageIndex < filesContent.length - 1) {
+        currentPageIndex++;
+        abrirArchivo(filesContent[currentPageIndex]);
     }
+}
 
-    // Función para retroceder a la página anterior
-    function previousPage() {
-        if (currentPageIndex > 0) {
-            currentPageIndex--;
-            abrirArchivo(filesContent[currentPageIndex]);
-        }
+// Función para retroceder a la página anterior
+function previousPage() {
+    if (currentPageIndex > 0) {
+        currentPageIndex--;
+        abrirArchivo(filesContent[currentPageIndex]);
     }
+}
 
-    // Asignar eventos de teclado para detectar las teclas de flecha derecha e izquierda
-    document.addEventListener('keydown', function(event) {
-        const keyCode = event.keyCode || event.which;
 
-        // Verificar si se presionó la tecla de flecha derecha (código 39)
-        if (keyCode === 39) {
-            nextPage(); // Avanzar a la siguiente página
-        }
-
-        // Verificar si se presionó la tecla de flecha izquierda (código 37)
-        if (keyCode === 37) {
-            previousPage(); // Retroceder a la página anterior
-        }
-    });
 // Llamar a la función para cargar opciones cuando se cargue la página
 window.onload = loadFilesIntoDropdown;
 
@@ -235,6 +222,23 @@ function seleccionArchivo(){
     });
 }
 
+function asignarTeclas() {
+    // Asignar eventos de teclado para detectar las teclas de flecha derecha e izquierda
+    ventanaEmergente.addEventListener('keydown', function(event) {
+        const keyCode = event.keyCode || event.which;
+
+        // Verificar si se presionó la tecla de flecha derecha (código 39)
+        if (keyCode === 39) {
+            nextPage(); // Avanzar a la siguiente página
+        }
+
+        // Verificar si se presionó la tecla de flecha izquierda (código 37)
+        if (keyCode === 37) {
+            previousPage(); // Retroceder a la página anterior
+        }
+    });
+}
+
 
 // Función para avanzar al siguiente archivo
 function nextFile() {
@@ -246,19 +250,20 @@ function nextFile() {
         abrirArchivo(bookLinks[currentFileIndex]);
     }
 }
-// Asignar un evento de teclado para detectar la tecla de flecha derecha (código 39)
-document.addEventListener('keydown', function(event) {
-    const keyCode = event.keyCode || event.which;
-    if (keyCode === 39) {
-        nextFile(); // Llamar a la función para avanzar al siguiente archivo
-    }
-});
 function abrirArchivo(link){
-    if (!ventanaEmergente || ventanaEmergente.closed) {
-        ventanaEmergente = window.open(link, '_blank');
-    } else {
-        ventanaEmergente.location.href = link;
+    // Crear un iframe si no existe
+    if (!ventanaEmergente) {
+        ventanaEmergente = window.open('', '_blank', 'width=800,height=600');
+        ventanaEmergente.document.write('<iframe id="iframe" width="100%" height="100%" frameborder="0"></iframe>');
+        // Asignar eventos de teclado para detectar las teclas de flecha derecha e izquierda
+        asignarTeclas();
     }
+
+    // Obtener el iframe del documento emergente
+    const iframe = ventanaEmergente.document.getElementById('iframe');
+    // Cargar la nueva página en el iframe
+    iframe.src = link;
+
 }
 
 window.addEventListener('load', () => {

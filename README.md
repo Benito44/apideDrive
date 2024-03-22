@@ -2,7 +2,7 @@ npm install multer
 npm install googleapis
 npm install adm-zip
 
-## PROGRESO
+# PROGRESO
 Mario, 21/03/2024 --> Hasta ahora, podemos subir archivos, descomprimirlos y coger el contenido de la carpeta de contenido y crear los links para ver los capítulos.
 Se envian bien los links, y se crea la ventana nueva (no como emergente, eso hay que arreglarlo), pero no se ve el contenido, falta de solucionar este problema.
 
@@ -14,3 +14,7 @@ por el 8080 (antes estaba en el 3000 y parece que ahora se muestra la portada de
 Lo he podido medio arreglar, hasta ahora se puede abrir el libro en otra pestaña y si clicas en la flecha derecha MIENTRAS estas en la pagina de seleccion de ficheros pasaras de pàgina
 ![alt text](image-4.png)
 y estando ahi le das clic a la flecha de la derecha
+
+# 22/03/2024
+## Solucion a mostrar el contenido en una ventana emergente y usar las flechas
+Mario, 22/03/2024 --> Ahora el contenido se abre dentro de una ventana emergente, y para solucionar el reacomodado de las flechas al pasar página, simplemente he hecho que el contenido se muestre dentro de un iFrame, así la página no se recarga y no pierde los listeners.
