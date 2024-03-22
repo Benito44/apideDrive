@@ -6,6 +6,11 @@ npm install adm-zip
 Mario, 21/03/2024 --> Hasta ahora, podemos subir archivos, descomprimirlos y coger el contenido de la carpeta de contenido y crear los links para ver los capítulos.
 Se envian bien los links, y se crea la ventana nueva (no como emergente, eso hay que arreglarlo), pero no se ve el contenido, falta de solucionar este problema.
 
+# 22/03/2024
 ## Solucion a mostrar el contenido
 Benito, 22/03/2024 --> He podido solucionar el mostrar el contenido canviando el puerto que llamabas en la linia 85
 por el 8080 (antes estaba en el 3000 y parece que ahora se muestra la portada del libro)
+## Pasar las paginas del libro
+Lo he podido medio arreglar, hasta ahora se puede abrir el libro en otra pestaña y si clicas en la flecha derecha MIENTRAS estas en la pagina de seleccion de ficheros pasaras de pàgina
+![alt text](image-4.png)
+y estando ahi le das clic a la flecha de la derecha

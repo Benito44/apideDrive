@@ -26,6 +26,7 @@ const driveClient = new GoogleDriveClient(credentialsPath);
 
 
 import { dirname } from 'path';
+import { Console } from 'console';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -84,10 +85,22 @@ app.post('/upload', upload.single('file'), (req, res) => {
             const textFiles = fs.readdirSync(textDirPath);
             const textLinks = textFiles.map(file => `http://localhost:8080/books/${originalName}/OEBPS/Text/${file}`); // Ajustado para incluir 'OEBPS'
 
+            // Envía los enlaces al cliente
             res.send(textLinks);
+
+// Cambiar al siguiente archivo cada 10 segundos
+let currentIndex = 0;
+setInterval(() => {
+    currentIndex = (currentIndex + 1) % textFiles.length;
+    const nextFile = textFiles[currentIndex];
+    const nextLink = `http://localhost:8080/books/${originalName}/OEBPS/Text/${nextFile}`;
+    res.write(JSON.stringify({ nextLink }));
+    console.log(nextLink);
+}, 5000); // Cambia cada 10 segundos (10000 milisegundos)
         }
     }
 });
+
 
 app.get('/books/:bookId', (req, res) => {
     const bookId = req.params.bookId;

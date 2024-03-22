@@ -88,6 +88,9 @@
         <button id="mostrarFile">Lleguir</button>
 
         <div id="contenidoEpub"></div>
+        <div id="nextLinkContainer">
+            <!-- Aquí se mostrará el enlace del siguiente archivo -->
+        </div>
         
     </div>
 </body>
@@ -118,7 +121,39 @@ async function loadFilesIntoDropdown() {
     }
 }
 
+    // Definir una variable para almacenar el índice de la página actualmente mostrada
+    let currentPageIndex = 0;
 
+    // Función para avanzar a la siguiente página
+    function nextPage() {
+        if (currentPageIndex < filesContent.length - 1) {
+            currentPageIndex++;
+            abrirArchivo(filesContent[currentPageIndex]);
+        }
+    }
+
+    // Función para retroceder a la página anterior
+    function previousPage() {
+        if (currentPageIndex > 0) {
+            currentPageIndex--;
+            abrirArchivo(filesContent[currentPageIndex]);
+        }
+    }
+
+    // Asignar eventos de teclado para detectar las teclas de flecha derecha e izquierda
+    document.addEventListener('keydown', function(event) {
+        const keyCode = event.keyCode || event.which;
+
+        // Verificar si se presionó la tecla de flecha derecha (código 39)
+        if (keyCode === 39) {
+            nextPage(); // Avanzar a la siguiente página
+        }
+
+        // Verificar si se presionó la tecla de flecha izquierda (código 37)
+        if (keyCode === 37) {
+            previousPage(); // Retroceder a la página anterior
+        }
+    });
 // Llamar a la función para cargar opciones cuando se cargue la página
 window.onload = loadFilesIntoDropdown;
 
@@ -200,6 +235,24 @@ function seleccionArchivo(){
     });
 }
 
+
+// Función para avanzar al siguiente archivo
+function nextFile() {
+    // Verificar si hay más archivos disponibles en bookLinks
+    if (currentFileIndex < bookLinks.length - 1) {
+        // Incrementar el índice para pasar al siguiente archivo
+        currentFileIndex++;
+        // Abrir el archivo correspondiente
+        abrirArchivo(bookLinks[currentFileIndex]);
+    }
+}
+// Asignar un evento de teclado para detectar la tecla de flecha derecha (código 39)
+document.addEventListener('keydown', function(event) {
+    const keyCode = event.keyCode || event.which;
+    if (keyCode === 39) {
+        nextFile(); // Llamar a la función para avanzar al siguiente archivo
+    }
+});
 function abrirArchivo(link){
     if (!ventanaEmergente || ventanaEmergente.closed) {
         ventanaEmergente = window.open(link, '_blank');
