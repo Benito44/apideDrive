@@ -82,7 +82,7 @@ app.post('/upload', upload.single('file'), (req, res) => {
             res.status(400).send('No se encontró el directorio Text/');
         } else {
             const textFiles = fs.readdirSync(textDirPath);
-            const textLinks = textFiles.map(file => `http://localhost:3000/books/${originalName}/OEBPS/Text/${file}`); // Ajustado para incluir 'OEBPS'
+            const textLinks = textFiles.map(file => `http://localhost:8080/books/${originalName}/OEBPS/Text/${file}`); // Ajustado para incluir 'OEBPS'
 
             res.send(textLinks);
         }
