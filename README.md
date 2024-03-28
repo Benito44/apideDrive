@@ -20,5 +20,10 @@ y estando ahi le das clic a la flecha de la derecha
 Mario, 22/03/2024 --> Ahora el contenido se abre dentro de una ventana emergente, y para solucionar el reacomodado de las flechas al pasar página, simplemente he hecho que el contenido se muestre dentro de un iFrame, así la página no se recarga y no pierde los listeners.
 
 # 28/03/2024
+## Intento de cargar desde el drive
  // Intento de cargar desde el drive
  Busca esta linia y lo debajo seran los canvios que he echo
+## Eliminar ficheros
+He echo que ahora se muestren en una tabla los libros guardados en el drive con 2 botones:
+- Eliminar: Elimina el libro del drive y actualiza la tabla
+- Leer: Todavia no esta implementado pero lo podriamos utilizar para leer el libro

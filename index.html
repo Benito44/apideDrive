@@ -127,11 +127,17 @@
                     const actionCell = document.createElement('td');
                     const button = document.createElement('button');
                     button.type = "submit";
-                    button.textContent = "Submit";
+                    button.textContent = "Eliminar";
                     button.id = "eliminar";
                     button.setAttribute('data-id', file.id); // Almacenar el ID del archivo como un atributo de datos
-                button.addEventListener('click', eliminarArchivo); // Agregar un event listener para eliminar el archivo
+                    button.addEventListener('click', eliminarArchivo); // Agregar un event listener para eliminar el archivo
                     actionCell.appendChild(button);
+
+                    const botoLlegir = document.createElement('button');
+                    botoLlegir.type = "submit";
+                    botoLlegir.textContent = "Leer";
+                    botoLlegir.id = "leer";
+                    actionCell.appendChild(botoLlegir);
                     row.appendChild(actionCell);
 
                     bookList.appendChild(row);
@@ -332,7 +338,9 @@ function abrirArchivo(link){
 window.addEventListener('load', () => {
     let nombreArchivoEpub = document.getElementById('nombreArchivoEpub');
     nombreArchivoEpub.addEventListener('change', seleccionArchivo);
+    loadFilesIntoDropdown;
     loadBooksIntoList;
+
 });
 
  // Intento de cargar desde el drive
