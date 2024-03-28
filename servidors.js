@@ -42,6 +42,21 @@ app.use('/books', express.static(path.join(__dirname, 'books')));
 app.get('/', (req, res) => {
     res.sendFile(__dirname + '/index.html');
 });
+// Ruta para eliminar un archivo del drive
+app.delete('/eliminar-archivo', async (req, res) => {
+    const fileId = req.query.id; // Obtener el ID del archivo desde la consulta de la URL
+
+    try {
+        // Lógica para eliminar el archivo del drive utilizando el fileId
+        console.log(fileId);
+        await driveClient.deleteFile(fileId);
+        res.status(200).send('Archivo eliminado correctamente del drive');
+    } catch (error) {
+        console.error('Error al eliminar el archivo del drive:', error);
+        res.status(500).send('Error al eliminar el archivo del drive');
+    }
+});
+
 app.get('/listar-archivos-en-carpeta', async (req, res) => {
     try {
         const folderId = "1tj58NJSDDjqP8u4YR1cN0AV0MFRz7t-Z";

@@ -107,5 +107,17 @@ export class GoogleDriveClient {
             throw error;
         }
     }
+    async deleteFile(fileId) {
+        try {
+            // Eliminar el archivo utilizando la API de Google Drive
+            await this.driveClient.files.delete({
+                fileId: fileId
+            });
+    
+            console.log(`El archivo con ID "${fileId}" se eliminó correctamente.`);
+        } catch (error) {
+            console.error('Error al eliminar el archivo:', error);
+        }
+    }
     
 }
