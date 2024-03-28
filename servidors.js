@@ -52,6 +52,10 @@ app.get('/listar-archivos-en-carpeta', async (req, res) => {
         res.status(500).send('Error al obtener la lista de archivos en la carpeta');
     }
 });
+
+
+
+
 app.get('/libroId', async (req, res) => {
     try {
         const libroId = req.params.libroId;
@@ -95,7 +99,7 @@ setInterval(() => {
     const nextFile = textFiles[currentIndex];
     const nextLink = `http://localhost:8080/books/${originalName}/OEBPS/Text/${nextFile}`;
     res.write(JSON.stringify({ nextLink }));
-    console.log(nextLink);
+    //console.log(nextLink);
 }, 5000); // Cambia cada 10 segundos (10000 milisegundos)
         }
     }
@@ -135,6 +139,37 @@ app.post('/ruta', upload.any(), async (req, res) => {
         console.error('Error al procesar el formulario:', error);
         res.status(500).send('Error interno del servidor');
     }
+// Intento de cargar desde el drive
+// Ruta para listar los libros disponibles
+app.get('/listar-libros-disponibles', (req, res) => {
+    // Lógica para obtener la lista de libros disponibles
+    const books = [
+        { id: 1, title: 'Libro 1' },
+        { id: 2, title: 'Libro 2' },
+        { id: 3, title: 'Libro 3' }
+    ];
+    res.json(books);
+});
+
+// Ruta para obtener el contenido del libro seleccionado
+app.get('/obtener-libro', (req, res) => {
+    const fileName = req.query.fileName; // Obtener el nombre del archivo desde la consulta de la URL
+    const filePath = `${__dirname}/books/${fileName}/OEBPS/Text/cubierta.xhtml`;
+
+    // Leer el contenido del archivo
+    fs.readFile(filePath, 'utf8', (err, data) => {
+        if (err) {
+            console.error('Error al leer el archivo:', err);
+            res.status(500).send('Error al leer el archivo del libro');
+            return;
+        }
+
+        res.send(data); // Enviar el contenido del archivo como respuesta al cliente
+    });
+});
+
+
+
 });// Iniciar el servidor
 app.listen(PORT, () => {
     console.log(`Servidor escuchando en http://localhost:${PORT}`);

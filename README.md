@@ -18,3 +18,7 @@ y estando ahi le das clic a la flecha de la derecha
 # 22/03/2024
 ## Solucion a mostrar el contenido en una ventana emergente y usar las flechas
 Mario, 22/03/2024 --> Ahora el contenido se abre dentro de una ventana emergente, y para solucionar el reacomodado de las flechas al pasar página, simplemente he hecho que el contenido se muestre dentro de un iFrame, así la página no se recarga y no pierde los listeners.
+
+# 28/03/2024
+ // Intento de cargar desde el drive
+ Busca esta linia y lo debajo seran los canvios que he echo

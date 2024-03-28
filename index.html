@@ -80,7 +80,7 @@
             <select id="fileDropdown">
                 <option value="">Select a file...</option>
             </select>
-            <button id="myButton" type="submit">Submit</button>
+            <button id="selectButton" type="button">Seleccionar Libro</button>
         </form>
 
         <input type="file" id="nombreArchivoEpub" name="fileALleguir">
@@ -95,11 +95,9 @@
     </div>
 </body>
 <script>
-    
 // Obtener referencia al menú desplegable
 const fileDropdown = document.getElementById('fileDropdown');
 
-// Función para cargar opciones en el menú desplegable
 // Función para cargar opciones en el menú desplegable
 async function loadFilesIntoDropdown() {
     try {
@@ -270,6 +268,43 @@ window.addEventListener('load', () => {
     let nombreArchivoEpub = document.getElementById('nombreArchivoEpub');
     nombreArchivoEpub.addEventListener('change', seleccionArchivo);
 });
+
+ // Intento de cargar desde el drive
+ async function loadBooksIntoDropdown() {
+    try {
+        const response = await fetch('/listar-libros-disponibles');
+        const books = await response.json();
+
+        const fileDropdown = document.getElementById('fileDropdown');
+        fileDropdown.innerHTML = ''; // Limpiar opciones anteriores
+
+        // Agregar nuevas opciones
+        books.forEach(book => {
+            const option = document.createElement('option');
+            option.value = book; // Utilizar el nombre del archivo en lugar del ID
+            option.textContent = book;
+            fileDropdown.appendChild(option);
+        });
+    } catch (error) {
+        console.error('Error cargando libros en el menú desplegable:', error);
+    }
+}
+
+
+        document.getElementById('selectButton').addEventListener('click', async () => {
+    const selectedFileName = document.getElementById('fileDropdown').value;
+    const response = await fetch(`/obtener-libro?fileName=${selectedFileName}`);
+    const bookContent = await response.text();
+
+    // Abrir una ventana emergente para mostrar el contenido del libro
+    const popupWindow = window.open('', '_blank', 'width=800,height=600');
+    popupWindow.document.write(bookContent);
+});
+
+
+
+        // Cargar libros disponibles cuando se carga la página
+        window.onload = loadBooksIntoDropdown;
 
 </script>
 </html>
