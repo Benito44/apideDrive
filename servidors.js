@@ -141,7 +141,7 @@ app.post('/ruta', upload.any(), async (req, res) => {
         }
 
         const file = req.files[0];
-        const filePath = file.originalname;
+        const filePath = path.basename(file.originalname, '.epub');;
         // Subir el archivo a Google Drive
         try {
             await driveClient.upload('application/epub+zip', filePath);
@@ -158,12 +158,23 @@ app.post('/ruta', upload.any(), async (req, res) => {
 // Ruta para listar los libros disponibles
 app.get('/listar-libros-disponibles', (req, res) => {
     // Lógica para obtener la lista de libros disponibles
-    const books = [
-        { id: 1, title: 'Libro 1' },
-        { id: 2, title: 'Libro 2' },
-        { id: 3, title: 'Libro 3' }
-    ];
-    res.json(books);
+    const books = [];
+
+    driveClient.files.list({
+        pageSize: 10,
+        fields: 'nextPageToken, files(id, name)',
+    }, (err, res) => {
+        if (err) return console.log('The API returned an error: ' + err);
+        const files = res.data.files;
+        if (files.length) {
+            files.map((file) => {
+                const file = {id: file.id, name: file.name};
+            });
+            res.send(books);
+        } else {
+            console.log('No files found.');
+        }
+    });
 });
 
 // Ruta para obtener el contenido del libro seleccionado

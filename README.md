@@ -27,3 +27,13 @@ Mario, 22/03/2024 --> Ahora el contenido se abre dentro de una ventana emergente
 He echo que ahora se muestren en una tabla los libros guardados en el drive con 2 botones:
 - Eliminar: Elimina el libro del drive y actualiza la tabla
 - Leer: Todavia no esta implementado pero lo podriamos utilizar para leer el libro
+
+
+# 30/03/2024
+## Guardar con el nombre en el DRIVE
+Mario --> Modificación para guardar con el nombre en vez de ID en DRIVE completada.
+FALTA COMPROVACIÓN
+
+## Listar libros directamente del DRIVE
+Mario --> Modificación para listar libros cogiendo los títulos desde el DRIVE completada.
+FALTA COMPROVACIÓN
