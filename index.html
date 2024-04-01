@@ -129,7 +129,7 @@
                     button.type = "submit";
                     button.textContent = "Eliminar";
                     button.id = "eliminar";
-                    button.setAttribute('data-id', file.id); // Almacenar el ID del archivo como un atributo de datos
+                    button.setAttribute('data-name', file.name); // Almacenar el ID del archivo como un atributo de datos
                     button.addEventListener('click', eliminarArchivo); // Agregar un event listener para eliminar el archivo
                     actionCell.appendChild(button);
 
@@ -137,6 +137,9 @@
                     botoLlegir.type = "submit";
                     botoLlegir.textContent = "Leer";
                     botoLlegir.id = "leer";
+                    botoLlegir.addEventListener('click', async () => {
+                        seleccionArchivo(file.name);
+                    })
                     actionCell.appendChild(botoLlegir);
                     row.appendChild(actionCell);
 
@@ -148,6 +151,26 @@
             }
 }
 
+function seleccionarArchivo(file) {
+    let formData = new FormData();
+    formData.append('file', file);
+
+    fetch('/upload', {
+        method: 'POST',
+        body: formData
+    }).then(response => {
+        if (response.ok) {
+            return response.json(); // Cambiado a json() ya que la respuesta ahora es una lista de enlaces
+        } else {
+            throw new Error('Error al subir y descomprimir el archivo');
+        }
+    }).then(bookLinks => {
+        // Aquí puedes manejar los enlaces del libro
+        console.log(bookLinks);
+        filesContent = bookLinks; // Guarda los enlaces en filesContent
+    abrirArchivo(bookLinks[0]); // Abre el primer enlace
+    });
+}
 
 async function eliminarArchivo() {
         const fileId = this.getAttribute('data-id'); // Obtener el ID del archivo desde el botón
@@ -365,7 +388,7 @@ window.addEventListener('load', () => {
 }
 
 
-        document.getElementById('selectButton').addEventListener('click', async () => {
+    document.getElementById('selectButton').addEventListener('click', async () => {
     const selectedFileName = document.getElementById('fileDropdown').value;
     const response = await fetch(`/obtener-libro?fileName=${selectedFileName}`);
     const bookContent = await response.text();
@@ -374,9 +397,6 @@ window.addEventListener('load', () => {
     const popupWindow = window.open('', '_blank', 'width=800,height=600');
     popupWindow.document.write(bookContent);
 });
-
-
-
         // Cargar libros disponibles cuando se carga la página
         //window.onload = loadBooksIntoDropdown;
 

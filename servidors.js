@@ -170,7 +170,8 @@ app.get('/listar-libros-disponibles', (req, res) => {
         let filesTemp = response.data.files;
         if (filesTemp.length) {
             filesTemp.map((file) => {
-                let fileTemp = {id: file.id, name: file.name};
+                let name = path.basename(file.name, '.epub');
+                let fileTemp = {id: file.id, name: name};
                 books.push(fileTemp);
             });
             return res.send(books);
