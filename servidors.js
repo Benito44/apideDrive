@@ -141,7 +141,7 @@ app.post('/ruta', upload.any(), async (req, res) => {
         }
 
         const file = req.files[0];
-        const filePath = path.basename(file.originalname, '.epub');;
+        const filePath = file.originalName;;
         // Subir el archivo a Google Drive
         try {
             await driveClient.upload('application/epub+zip', filePath);
