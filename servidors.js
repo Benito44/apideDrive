@@ -136,24 +136,26 @@ app.get('/books/:bookId', (req, res) => {
 app.post('/ruta', upload.any(), async (req, res) => {
     try {
         if (!req.files || !req.files.length) {
-            res.status(400).send('No se encontró ningún archivo adjunto');
-            return;
+            return res.status(400).send('No se encontró ningún archivo adjunto');
         }
 
         const file = req.files[0];
-        const filePath = file.originalName;;
+        const fileName = file.originalname; // Use original file name
         // Subir el archivo a Google Drive
         try {
-            await driveClient.upload('application/epub+zip', filePath);
-            res.status(200).send('Archivo subido correctamente a Google Drive');
+            await driveClient.upload('application/epub+zip', fileName); // Pass the file name
+            return res.status(200).send('Archivo subido correctamente a Google Drive');
         } catch (error) {
             console.error('Error al subir el archivo a Google Drive:', error);
-            res.status(500).send('Error al subir el archivo a Google Drive');
+            return res.status(500).send('Error al subir el archivo a Google Drive');
         }
     } catch (error) {
         console.error('Error al procesar el formulario:', error);
-        res.status(500).send('Error interno del servidor');
+        return res.status(500).send('Error interno del servidor');
     }
+});
+
+
 // Intento de cargar desde el drive
 // Ruta para listar los libros disponibles
 app.get('/listar-libros-disponibles', (req, res) => {
@@ -163,15 +165,15 @@ app.get('/listar-libros-disponibles', (req, res) => {
     driveClient.files.list({
         pageSize: 10,
         fields: 'nextPageToken, files(id, name)',
-    }, (err, res) => {
+    }, (err, response) => { // <-- Renamed 'res' to 'response'
         if (err) return console.log('The API returned an error: ' + err);
-        let filesTemp = res.data.files;
+        let filesTemp = response.data.files;
         if (filesTemp.length) {
             filesTemp.map((file) => {
                 let fileTemp = {id: file.id, name: file.name};
                 books.push(fileTemp);
             });
-            res.send(books);
+            return res.send(books);
         } else {
             console.log('No files found.');
         }
@@ -187,17 +189,14 @@ app.get('/obtener-libro', (req, res) => {
     fs.readFile(filePath, 'utf8', (err, data) => {
         if (err) {
             console.error('Error al leer el archivo:', err);
-            res.status(500).send('Error al leer el archivo del libro');
-            return;
+            return res.status(500).send('Error al leer el archivo del libro');
         }
 
-        res.send(data); // Enviar el contenido del archivo como respuesta al cliente
+        return res.send(data); // Enviar el contenido del archivo como respuesta al cliente
     });
 });
 
-
-
-});// Iniciar el servidor
+// Iniciar el servidor
 app.listen(PORT, () => {
     console.log(`Servidor escuchando en http://localhost:${PORT}`);
 });
