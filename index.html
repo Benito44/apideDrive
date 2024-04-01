@@ -137,8 +137,8 @@
                     botoLlegir.type = "submit";
                     botoLlegir.textContent = "Leer";
                     botoLlegir.id = "leer";
-                    botoLlegir.addEventListener('click', async () => {
-                        seleccionArchivo(file.name);
+                    botoLlegir.addEventListener('click', function() {
+                        seleccionarArchivo(file.name);
                     })
                     actionCell.appendChild(botoLlegir);
                     row.appendChild(actionCell);
