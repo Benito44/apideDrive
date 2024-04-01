@@ -129,7 +129,7 @@
                     button.type = "submit";
                     button.textContent = "Eliminar";
                     button.id = "eliminar";
-                    button.setAttribute('data-name', file.name); // Almacenar el ID del archivo como un atributo de datos
+                    button.setAttribute('data-id', file.id); // Almacenar el ID del archivo como un atributo de datos
                     button.addEventListener('click', eliminarArchivo); // Agregar un event listener para eliminar el archivo
                     actionCell.appendChild(button);
 
@@ -139,7 +139,7 @@
                     botoLlegir.id = "leer";
                     botoLlegir.addEventListener('click', function() {
                         seleccionarArchivo(file);
-                    })
+                    });
                     actionCell.appendChild(botoLlegir);
                     row.appendChild(actionCell);
 
@@ -150,6 +150,16 @@
                 console.error('Error cargando libros en la lista:', error);
             }
 }
+
+let input = document.getElementById('nombreArchivoEpub');
+let file = input.files[0];
+
+let formData = new FormData();
+formData.append('file', file);
+
+let currentFileIndex = 0;
+let filesContent = [];
+let ventanaEmergente;
 
 function seleccionarArchivo(file) {
     let formData = new FormData();
@@ -280,15 +290,6 @@ formElem.addEventListener('submit', async (e) => {
     });
 });
 
-let input = document.getElementById('nombreArchivoEpub');
-let file = input.files[0];
-
-let formData = new FormData();
-formData.append('file', file);
-
-let currentFileIndex = 0;
-let filesContent = [];
-let ventanaEmergente;
 
 function seleccionArchivo(){
     let listadoArchivos = this.files;
