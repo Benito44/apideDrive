@@ -144,7 +144,7 @@ app.post('/ruta', upload.any(), async (req, res) => {
         const filePath = file.originalName;;
         // Subir el archivo a Google Drive
         try {
-            await driveClient.upload('application/epub+zip', filePath);
+            await driveClient.upload('application/epub+zip', toString(filePath));
             res.status(200).send('Archivo subido correctamente a Google Drive');
         } catch (error) {
             console.error('Error al subir el archivo a Google Drive:', error);
