@@ -137,8 +137,31 @@
                     botoLlegir.type = "submit";
                     botoLlegir.textContent = "Leer";
                     botoLlegir.id = "leer";
+                    // botoLlegir.addEventListener('click', function() {
+                    //     seleccionarArchivo(file);
+                    // });
                     botoLlegir.addEventListener('click', function() {
-                        seleccionarArchivo(file);
+                        fetch(`/get-file-content?id=${file.id}`)
+                        .then(response => response.blob())
+                        .then(blob => {
+                            let formData = new FormData();
+                            formData.append('file', blob, file.name);
+
+                            fetch('/upload', {
+                                method: 'POST',
+                                body: formData
+                            }).then(response => {
+                                if (response.ok) {
+                                    return response.json();
+                                } else {
+                                    throw new Error('Error al subir y descomprimir el archivo');
+                                }
+                            }).then(bookLinks => {
+                                console.log(bookLinks);
+                                filesContent = bookLinks;
+                                abrirArchivo(bookLinks[0]);
+                            });
+                        });
                     });
                     actionCell.appendChild(botoLlegir);
                     row.appendChild(actionCell);
@@ -150,12 +173,6 @@
                 console.error('Error cargando libros en la lista:', error);
             }
 }
-
-let input = document.getElementById('nombreArchivoEpub');
-let file = input.files[0];
-
-let formData = new FormData();
-formData.append('file', file);
 
 let currentFileIndex = 0;
 let filesContent = [];
