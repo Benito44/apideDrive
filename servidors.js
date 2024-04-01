@@ -165,10 +165,11 @@ app.get('/listar-libros-disponibles', (req, res) => {
         fields: 'nextPageToken, files(id, name)',
     }, (err, res) => {
         if (err) return console.log('The API returned an error: ' + err);
-        const files = res.data.files;
-        if (files.length) {
-            files.map((file) => {
-                const file = {id: file.id, name: file.name};
+        let filesTemp = res.data.files;
+        if (filesTemp.length) {
+            filesTemp.map((file) => {
+                let fileTemp = {id: file.id, name: file.name};
+                books.push(fileTemp);
             });
             res.send(books);
         } else {
