@@ -107,19 +107,19 @@ app.post('/upload', upload.single('file'), (req, res) => {
             // Envía los enlaces al cliente
             res.send(textLinks);
 
+
+// Cambiar al siguiente archivo cada 10 segundos
+// let currentIndex = 0;
+// setInterval(() => {
+//     currentIndex = (currentIndex + 1) % textFiles.length;
+//     const nextFile = textFiles[currentIndex];
+//     const nextLink = `http://localhost:8080/books/${originalName}/OEBPS/Text/${nextFile}`;
+//     res.write(JSON.stringify({ nextLink }));
+//     //console.log(nextLink);
+// }, 5000); // Cambia cada 10 segundos (10000 milisegundos)
         }
     }
 });
-// Cambiar al siguiente archivo cada 10 segundos
-let currentIndex = 0;
-setInterval(() => {
-    currentIndex = (currentIndex + 1) % textFiles.length;
-    const nextFile = textFiles[currentIndex];
-    const nextLink = `http://localhost:8080/books/${originalName}/OEBPS/Text/${nextFile}`;
-    res.write(JSON.stringify({ nextLink }));
-    //console.log(nextLink);
-}, 5000); // Cambia cada 10 segundos (10000 milisegundos)
-
 
 
 app.get('/books/:bookId', (req, res) => {
