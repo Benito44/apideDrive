@@ -16,7 +16,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static('public')); 
 app.use(express.static('css')); // Agregar middleware para servir archivos CSS
-app.use(express.static('js')); // Agregar middleware para servir archivos JS
+app.use(express.static('js')); // Agregar middleware para servir archivos CSS
 
 const credentialsPath = 'google_drive.json';
 const driveClient = new GoogleDriveClient(credentialsPath);
