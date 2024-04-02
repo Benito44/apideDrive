@@ -7,47 +7,35 @@ import { fileURLToPath } from 'url';
 import { GoogleDriveClient } from './drive.js';
 import AdmZip from 'adm-zip';
 
-
-
 const app = express();
 const PORT = 8080;
 
-const upload = multer({ dest: 'uploads/' }); // Directorio donde se guardarán los archivos temporales
-// Configurar middleware para manejar solicitudes POST multipart/form-data
+const upload = multer({ dest: 'uploads/' }); 
 
 app.use(express.urlencoded({ extended: true }));
-
 app.use(express.json());
-
-app.use(express.static('public')); // Si tienes archivos estáticos como HTML, CSS o JS
+app.use(express.static('public')); 
+app.use(express.static('css')); // Agregar middleware para servir archivos CSS
+app.use(express.static('js')); // Agregar middleware para servir archivos JS
 
 const credentialsPath = 'google_drive.json';
 const driveClient = new GoogleDriveClient(credentialsPath);
 
-
-import { dirname } from 'path';
-import { Console } from 'console';
-
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-
-// Array con los libros y el capítulo que se encuentra leyendo el usuario
+const __dirname = path.dirname(__filename);
 
 let libros = [];
 
 app.use('/books', express.static(path.join(__dirname, 'books')));
 
-// Luego, puedes usar __dirname en tu ruta:
 app.get('/', (req, res) => {
     res.sendFile(__dirname + '/index.html');
 });
-// Ruta para eliminar un archivo del drive
+
 app.delete('/eliminar-archivo', async (req, res) => {
-    const fileId = req.query.id; // Obtener el ID del archivo desde la consulta de la URL
+    const fileId = req.query.id; 
 
     try {
-        // Lógica para eliminar el archivo del drive utilizando el fileId
         console.log(fileId);
         await driveClient.deleteFile(fileId);
         res.status(200).send('Archivo eliminado correctamente del drive');
@@ -67,9 +55,6 @@ app.get('/listar-archivos-en-carpeta', async (req, res) => {
         res.status(500).send('Error al obtener la lista de archivos en la carpeta');
     }
 });
-
-
-
 
 app.get('/libroId', async (req, res) => {
     try {
@@ -96,27 +81,15 @@ app.post('/upload', upload.single('file'), (req, res) => {
             zip.extractAllTo(targetPath, true);
         }
 
-        const textDirPath = path.join(targetPath, 'OEBPS', 'Text'); // Ajustado para incluir 'OEBPS'
+        const textDirPath = path.join(targetPath, 'OEBPS', 'Text');
         if (!fs.existsSync(textDirPath)) {
             console.log('No se encontró el directorio Text/');
             res.status(400).send('No se encontró el directorio Text/');
         } else {
             const textFiles = fs.readdirSync(textDirPath);
-            const textLinks = textFiles.map(file => `http://localhost:8080/books/${originalName}/OEBPS/Text/${file}`); // Ajustado para incluir 'OEBPS'
+            const textLinks = textFiles.map(file => `http://localhost:8080/books/${originalName}/OEBPS/Text/${file}`);
 
-            // Envía los enlaces al cliente
             res.send(textLinks);
-
-
-// Cambiar al siguiente archivo cada 10 segundos
-// let currentIndex = 0;
-// setInterval(() => {
-//     currentIndex = (currentIndex + 1) % textFiles.length;
-//     const nextFile = textFiles[currentIndex];
-//     const nextLink = `http://localhost:8080/books/${originalName}/OEBPS/Text/${nextFile}`;
-//     res.write(JSON.stringify({ nextLink }));
-//     //console.log(nextLink);
-// }, 5000); // Cambia cada 10 segundos (10000 milisegundos)
         }
     }
 });
@@ -141,10 +114,10 @@ app.post('/ruta', upload.any(), async (req, res) => {
         }
 
         const file = req.files[0];
-        const fileName = file.originalname; // Use original file name
-        // Subir el archivo a Google Drive
+        const fileName = file.originalname;
+
         try {
-            await driveClient.upload('application/epub+zip', fileName); // Pass the file name
+            await driveClient.upload('application/epub+zip', fileName);
             return res.status(200).send('Archivo subido correctamente a Google Drive');
         } catch (error) {
             console.error('Error al subir el archivo a Google Drive:', error);
@@ -157,16 +130,13 @@ app.post('/ruta', upload.any(), async (req, res) => {
 });
 
 
-// Intento de cargar desde el drive
-// Ruta para listar los libros disponibles
 app.get('/listar-libros-disponibles', (req, res) => {
-    // Lógica para obtener la lista de libros disponibles
     const books = [];
 
     driveClient.files.list({
         pageSize: 10,
         fields: 'nextPageToken, files(id, name)',
-    }, (err, response) => { // <-- Renamed 'res' to 'response'
+    }, (err, response) => {
         if (err) return console.log('The API returned an error: ' + err);
         let filesTemp = response.data.files;
         if (filesTemp.length) {
@@ -182,23 +152,20 @@ app.get('/listar-libros-disponibles', (req, res) => {
     });
 });
 
-// Ruta para obtener el contenido del libro seleccionado
 app.get('/obtener-libro', (req, res) => {
-    const fileName = req.query.fileName; // Obtener el nombre del archivo desde la consulta de la URL
+    const fileName = req.query.fileName;
     const filePath = `${__dirname}/books/${fileName}/OEBPS/Text/cubierta.xhtml`;
 
-    // Leer el contenido del archivo
     fs.readFile(filePath, 'utf8', (err, data) => {
         if (err) {
             console.error('Error al leer el archivo:', err);
             return res.status(500).send('Error al leer el archivo del libro');
         }
 
-        return res.send(data); // Enviar el contenido del archivo como respuesta al cliente
+        return res.send(data);
     });
 });
 
-// Iniciar el servidor
 app.listen(PORT, () => {
     console.log(`Servidor escuchando en http://localhost:${PORT}`);
 });
