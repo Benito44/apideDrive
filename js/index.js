@@ -148,16 +148,12 @@ if (currentPageIndex > 0) {
     abrirArchivo(filesContent[currentPageIndex]);
 }
 }
-
-
-// Llamar a la función para cargar opciones cuando se cargue la página
-window.onload = loadBooksIntoList;
-
-document.getElementById("myButton").onclick = function () {
-this.style.backgroundColor = "red";
-};
-
-var fileInput = document.getElementById('fileInput');
+document.addEventListener("DOMContentLoaded", function() {
+    // Tu código aquí
+    document.getElementById("myButton").onclick = function () {
+        this.style.backgroundColor = "red";
+    };
+    var fileInput = document.getElementById('fileInput');
 var fileInputLabel = document.getElementById('fileInputLabel');
 
 fileInput.addEventListener('change', function () {
@@ -180,8 +176,6 @@ if (fileInput.files && fileInput.files.length > 0) {
     fileInputLabel.textContent = 'Select Files';
 }
 });
-
-
 const formElem = document.querySelector('form');
 formElem.addEventListener('submit', async (e) => {
 console.log("form submitting")
@@ -230,22 +224,7 @@ abrirArchivo(bookLinks[0]); // Abre el primer enlace
 });
 }
 
-function asignarTeclas() {
-// Asignar eventos de teclado para detectar las teclas de flecha derecha e izquierda
-ventanaEmergente.addEventListener('keydown', function(event) {
-    const keyCode = event.keyCode || event.which;
 
-    // Verificar si se presionó la tecla de flecha derecha (código 39)
-    if (keyCode === 39) {
-        nextPage(); // Avanzar a la siguiente página
-    }
-
-    // Verificar si se presionó la tecla de flecha izquierda (código 37)
-    if (keyCode === 37) {
-        previousPage(); // Retroceder a la página anterior
-    }
-});
-}
 
 
 // Función para avanzar al siguiente archivo
@@ -258,66 +237,58 @@ if (currentFileIndex < bookLinks.length - 1) {
     abrirArchivo(bookLinks[currentFileIndex]);
 }
 }
-function abrirArchivo(link){
-// Crear un iframe si no existe
-if (!ventanaEmergente) {
-    ventanaEmergente = window.open('', '_blank', 'width=800,height=600');
-    ventanaEmergente.document.write('<iframe id="iframe" width="100%" height="100%" frameborder="0"></iframe>');
-    // Asignar eventos de teclado para detectar las teclas de flecha derecha e izquierda
-    asignarTeclas();
-}
 
-// Obtener el iframe del documento emergente
-const iframe = ventanaEmergente.document.getElementById('iframe');
-// Cargar la nueva página en el iframe
-iframe.src = link;
-
-// Al cerrar la ventana emergente, limpiar la referencia
-ventanaEmergente.onbeforeunload = function() {
-    ventanaEmergente = null;
-};
-
-}
 
 window.addEventListener('load', () => {
-let nombreArchivoEpub = document.getElementById('nombreArchivoEpub');
-nombreArchivoEpub.addEventListener('change', seleccionArchivo);
-loadFilesIntoDropdown;
 loadBooksIntoList;
 
 });
 
-// Intento de cargar desde el drive
-async function loadBooksIntoDropdown() {
-try {
-    const response = await fetch('/listar-libros-disponibles');
-    const books = await response.json();
-
-    const fileDropdown = document.getElementById('fileDropdown');
-    fileDropdown.innerHTML = ''; // Limpiar opciones anteriores
-
-    // Agregar nuevas opciones
-    books.forEach(book => {
-        const option = document.createElement('option');
-        option.value = book; // Utilizar el nombre del archivo en lugar del ID
-        option.textContent = book;
-        fileDropdown.appendChild(option);
-    });
-} catch (error) {
-    console.error('Error cargando libros en el menú desplegable:', error);
-}
-}
 
 
-document.getElementById('selectButton').addEventListener('click', async () => {
-const selectedFileName = document.getElementById('fileDropdown').value;
-const response = await fetch(`/obtener-libro?fileName=${selectedFileName}`);
-const bookContent = await response.text();
-
-// Abrir una ventana emergente para mostrar el contenido del libro
-const popupWindow = window.open('', '_blank', 'width=800,height=600');
-popupWindow.document.write(bookContent);
 });
-    // Cargar libros disponibles cuando se carga la página
-    //window.onload = loadBooksIntoDropdown;
 
+// Llamar a la función para cargar opciones cuando se cargue la página
+window.onload = loadBooksIntoList;
+
+
+
+
+
+
+function abrirArchivo(link){
+    // Crear un iframe si no existe
+    if (!ventanaEmergente) {
+        ventanaEmergente = window.open('', '_blank', 'width=800,height=600');
+        ventanaEmergente.document.write('<iframe id="iframe" width="100%" height="100%" frameborder="0"></iframe>');
+        // Asignar eventos de teclado para detectar las teclas de flecha derecha e izquierda
+        asignarTeclas();
+    }
+    
+    // Obtener el iframe del documento emergente
+    const iframe = ventanaEmergente.document.getElementById('iframe');
+    // Cargar la nueva página en el iframe
+    iframe.src = link;
+    
+    // Al cerrar la ventana emergente, limpiar la referencia
+    ventanaEmergente.onbeforeunload = function() {
+        ventanaEmergente = null;
+    };
+    
+    }
+    function asignarTeclas() {
+        // Asignar eventos de teclado para detectar las teclas de flecha derecha e izquierda
+        ventanaEmergente.addEventListener('keydown', function(event) {
+            const keyCode = event.keyCode || event.which;
+        
+            // Verificar si se presionó la tecla de flecha derecha (código 39)
+            if (keyCode === 39) {
+                nextPage(); // Avanzar a la siguiente página
+            }
+        
+            // Verificar si se presionó la tecla de flecha izquierda (código 37)
+            if (keyCode === 37) {
+                previousPage(); // Retroceder a la página anterior
+            }
+        });
+        }
