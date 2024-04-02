@@ -126,7 +126,7 @@ try {
         fileDropdown.appendChild(option);
     });
 } catch (error) {
-    console.error('Error loading files into dropdown:', error);
+    console.error('Error al cargar los archivos en el menú dropdown:', error);
 }
 }
 
@@ -169,11 +169,11 @@ if (fileInput.files && fileInput.files.length > 0) {
     if (fileInput.files.length === 1) {
         fileName = fileInput.files[0].name;
     } else {
-        fileName = fileInput.files.length + ' files selected';
+        fileName = fileInput.files.length + ' arvhivos seleccionados';
     }
     fileInputLabel.textContent = fileName;
 } else {
-    fileInputLabel.textContent = 'Select Files';
+    fileInputLabel.textContent = 'Archivos seleccionados';
 }
 });
 const formElem = document.querySelector('form');
@@ -184,16 +184,16 @@ await fetch('/ruta', {
     method: 'POST',
     body: new FormData(formElem),
 }).then(response => {
-    document.querySelector('p').textContent = "Successfully uploaded to drive";
+    document.querySelector('p').textContent = "Cargado con éxito";
 
     document.getElementById("myButton").style.backgroundColor = "green"
-    document.getElementById('fileInputLabel').textContent = "Select Files";
+    document.getElementById('fileInputLabel').textContent = "Archivos seleccionados";
     document.querySelector('p').style.display = 'block';
     console.log(response);
     loadFilesIntoDropdown();
     loadBooksIntoList();
 }).catch(error => {
-    document.querySelector('p').textContent = "Was not uploaded" + error;
+    document.querySelector('p').textContent = "No se pudo cargar: " + error;
     document.querySelector('p').style.display = 'block';
     console.error(error);
 });

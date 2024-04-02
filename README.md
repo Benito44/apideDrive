@@ -32,8 +32,6 @@ He echo que ahora se muestren en una tabla los libros guardados en el drive con 
 # 30/03/2024
 ## Guardar con el nombre en el DRIVE
 Mario --> Modificación para guardar con el nombre en vez de ID en DRIVE completada.
-FALTA COMPROVACIÓN
 
 ## Listar libros directamente del DRIVE
 Mario --> Modificación para listar libros cogiendo los títulos desde el DRIVE completada.
-FALTA COMPROVACIÓN

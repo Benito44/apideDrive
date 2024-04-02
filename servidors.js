@@ -141,7 +141,7 @@ app.get('/listar-libros-disponibles', (req, res) => {
         pageSize: 10,
         fields: 'nextPageToken, files(id, name)',
     }, (err, response) => {
-        if (err) return console.log('The API returned an error: ' + err);
+        if (err) return console.log('La API ha devuelto un error: ' + err);
         let filesTemp = response.data.files;
         if (filesTemp.length) {
             filesTemp.map((file) => {
@@ -151,7 +151,7 @@ app.get('/listar-libros-disponibles', (req, res) => {
             });
             return res.send(books);
         } else {
-            console.log('No files found.');
+            console.log('No se encontraron archivos.');
         }
     });
 });
