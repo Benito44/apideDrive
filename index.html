@@ -374,6 +374,11 @@ function abrirArchivo(link){
     // Cargar la nueva página en el iframe
     iframe.src = link;
 
+    // Al cerrar la ventana emergente, limpiar la referencia
+    ventanaEmergente.onbeforeunload = function() {
+        ventanaEmergente = null;
+    };
+
 }
 
 window.addEventListener('load', () => {
