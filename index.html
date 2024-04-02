@@ -262,26 +262,33 @@ function previousPage() {
 // Llamar a la función para cargar opciones cuando se cargue la página
 window.onload = loadBooksIntoList;
 
-    document.getElementById("myButton").onclick = function () {
-        this.style.backgroundColor = "red";
-    };
-    
-    var fileInput = document.getElementById('fileInput');
-    var fileInputLabel = document.getElementById('fileInputLabel');
+document.getElementById("myButton").onclick = function () {
+    this.style.backgroundColor = "red";
+};
 
-    fileInput.addEventListener('change', function () {
-        if (fileInput.files && fileInput.files.length > 0) {
-            var fileName = '';
-            if (fileInput.files.length === 1) {
-                fileName = fileInput.files[0].name;
-            } else {
-                fileName = fileInput.files.length + ' files selected';
-            }
-            fileInputLabel.textContent = fileName;
+var fileInput = document.getElementById('fileInput');
+var fileInputLabel = document.getElementById('fileInputLabel');
+
+fileInput.addEventListener('change', function () {
+    if (fileInput.files && fileInput.files.length > 0) {
+        let formData = new FormData();
+        formData.append('file', fileInput.files[0]);
+
+        fetch('/upload', {
+            method: 'POST',
+            body: formData
+        });
+        var fileName = '';
+        if (fileInput.files.length === 1) {
+            fileName = fileInput.files[0].name;
         } else {
-            fileInputLabel.textContent = 'Select Files';
+            fileName = fileInput.files.length + ' files selected';
         }
-    });
+        fileInputLabel.textContent = fileName;
+    } else {
+        fileInputLabel.textContent = 'Select Files';
+    }
+});
 
 
     const formElem = document.querySelector('form');
